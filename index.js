@@ -4,7 +4,13 @@ const path = require("path");
 const app = express();
 const Url = require("./models/url");
 const cookieParser = require("cookie-parser");
-const { restrictToLoggedinUserOnly, checkAuth } = require("./middlewares/auth");
+const {
+  // restrictToLoggedinUserOnly,
+  // checkAuth,
+
+  checkAuthentication,
+  restrictTo,
+} = require("./middlewares/auth");
 
 const { makeConnection } = require("./connection");
 const mongoUrl = "mongodb://127.0.0.1:27017/urlDatabase";
@@ -25,9 +31,10 @@ app.set("views", path.resolve("./views"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(checkAuthentication);
 
-app.use("/", checkAuth, testRouter);
-app.use("/url", restrictToLoggedinUserOnly, urlRouter);
+app.use("/", testRouter);
+app.use("/url", restrictTo(["normal", "admin"]), urlRouter);
 app.use("/user", userRouter);
 
 app.listen(port, () => {
